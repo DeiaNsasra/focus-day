@@ -1,0 +1,1499 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>המסגרת היומית שלי</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700&family=Secular+One&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #eaf0ec;
+    --surface: #ffffff;
+    --surface-2: #f4f7f5;
+    --text: #1d2925;
+    --muted: #5b6b65;
+    --line: #d5e0da;
+    --teal: #2a9d8f;
+    --teal-soft: #dcf1ec;
+    --teal-text: #1d6e64;
+    --amber: #e39b2d;
+    --amber-soft: #fbedd5;
+    --amber-text: #8a5510;
+    --danger: #c0533f;
+    --shadow: 0 1px 2px rgba(20, 40, 35, .06), 0 4px 16px rgba(20, 40, 35, .05);
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #121816;
+      --surface: #1b2320;
+      --surface-2: #222c28;
+      --text: #e3ebe7;
+      --muted: #9aaba4;
+      --line: #2e3a36;
+      --teal: #45b8a8;
+      --teal-soft: #1b3832;
+      --teal-text: #8fdccf;
+      --amber: #f0b050;
+      --amber-soft: #3a2d18;
+      --amber-text: #f5c97f;
+      --danger: #e07a66;
+      --shadow: 0 1px 2px rgba(0, 0, 0, .3);
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #121816;
+    --surface: #1b2320;
+    --surface-2: #222c28;
+    --text: #e3ebe7;
+    --muted: #9aaba4;
+    --line: #2e3a36;
+    --teal: #45b8a8;
+    --teal-soft: #1b3832;
+    --teal-text: #8fdccf;
+    --amber: #f0b050;
+    --amber-soft: #3a2d18;
+    --amber-text: #f5c97f;
+    --danger: #e07a66;
+    --shadow: 0 1px 2px rgba(0, 0, 0, .3);
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Assistant", system-ui, sans-serif;
+    font-size: 17px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  main {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 32px 16px 48px;
+  }
+  h1, h2, h3 {
+    font-family: "Secular One", "Assistant", sans-serif;
+    font-weight: 400;
+    margin: 0;
+    line-height: 1.2;
+  }
+  h1 { font-size: 2.1rem; }
+  .subtitle { color: var(--muted); margin: 6px 0 12px; }
+  .schedule { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 28px; padding: 0; }
+  .schedule span { background: var(--surface); border: 1px solid var(--line); border-radius: 99px; padding: 2px 12px; font-size: .9rem; color: var(--muted); }
+  .schedule b { color: var(--text); font-weight: 700; }
+  h2 { font-size: 1.35rem; }
+  h3 { font-size: 1.05rem; color: var(--muted); margin: 22px 0 10px; }
+  .small { font-size: .9rem; }
+  .muted { color: var(--muted); }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 22px;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow);
+  }
+  .card-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  button {
+    font: inherit;
+    cursor: pointer;
+    border-radius: 10px;
+    border: 1px solid var(--line);
+    background: var(--surface-2);
+    color: var(--text);
+    padding: 8px 16px;
+    transition: background .15s, border-color .15s;
+  }
+  button:hover { border-color: var(--muted); }
+  button:focus-visible, input:focus-visible, input:focus-visible + .box {
+    outline: 2px solid var(--amber);
+    outline-offset: 2px;
+  }
+  .btn-teal {
+    background: var(--teal);
+    border-color: var(--teal);
+    color: #fff;
+    font-weight: 700;
+  }
+  .btn-teal:hover { filter: brightness(1.06); border-color: var(--teal); }
+
+  input[type="text"], input[type="time"], select {
+    font: inherit;
+    color: var(--text);
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 8px 12px;
+    min-width: 0;
+  }
+  input[type="text"]::placeholder { color: var(--muted); opacity: .8; }
+  .add-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin: 16px 0 14px;
+  }
+  .add-row input[type="text"] { flex: 1 1 220px; }
+  .add-row input[type="time"] { flex: 0 0 auto; width: 120px; }
+
+  /* ---------- זמני תפילה ---------- */
+  .prayer-settings { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0; }
+  .prayer-settings select { flex: 1 1 160px; cursor: pointer; }
+  .next-badge {
+    font-weight: 700;
+    color: var(--amber-text);
+    background: var(--amber-soft);
+    border-radius: 99px;
+    padding: 2px 12px;
+    font-size: .95rem;
+  }
+  .next-badge:empty { display: none; }
+  .prayers {
+    list-style: none; margin: 0; padding: 0;
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
+  }
+  .prayer {
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 10px 12px;
+    display: flex; flex-direction: column; gap: 2px;
+  }
+  .prayer-name { font-weight: 700; display: flex; justify-content: space-between; gap: 6px; flex-wrap: wrap; }
+  .prayer-name span[lang="ar"] { font-weight: 400; color: var(--muted); }
+  .prayer-time { font-family: "Secular One", sans-serif; font-size: 1.6rem; line-height: 1.2; direction: ltr; text-align: right; }
+  .iqama { font-size: .82rem; color: var(--muted); }
+  .prayer.next .iqama { color: var(--amber-text); }
+  select:disabled { opacity: .5; cursor: default; }
+  .prayer.info { background: var(--surface-2); border-style: dashed; }
+  .prayer.info .prayer-time { font-size: 1.25rem; color: var(--muted); }
+  .prayer.past { opacity: .5; }
+  .prayer.next { border-color: var(--amber); background: var(--amber-soft); opacity: 1; }
+  .prayer.next .prayer-time { color: var(--amber-text); }
+  .prayer-note { margin: 14px 0 0; color: var(--muted); }
+  .toggle-row { display: flex; align-items: center; gap: 10px; margin-top: 14px; cursor: pointer; }
+  @media (max-width: 480px) { .prayers { grid-template-columns: repeat(2, 1fr); } }
+
+  /* ---------- טיימר ---------- */
+  .modes {
+    display: flex;
+    gap: 6px;
+    background: var(--surface-2);
+    padding: 4px;
+    border-radius: 12px;
+    margin-top: 16px;
+  }
+  .modes button {
+    flex: 1;
+    border: none;
+    background: transparent;
+    padding: 8px 6px;
+    font-size: .95rem;
+    color: var(--muted);
+  }
+  .modes button[aria-pressed="true"] {
+    background: var(--surface);
+    color: var(--text);
+    font-weight: 700;
+    box-shadow: var(--shadow);
+  }
+  .clock {
+    font-family: "Secular One", sans-serif;
+    font-size: clamp(4rem, 18vw, 6.5rem);
+    text-align: center;
+    margin: 18px 0 6px;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: .02em;
+    direction: ltr;
+  }
+  .progress {
+    height: 8px;
+    background: var(--surface-2);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+  .progress > div {
+    height: 100%;
+    width: 0;
+    background: var(--amber);
+    border-radius: 99px;
+    transition: width .3s linear;
+  }
+  .hint {
+    text-align: center;
+    background: var(--amber-soft);
+    color: var(--amber-text);
+    border-radius: 10px;
+    padding: 10px 14px;
+    margin: 16px 0;
+    font-weight: 600;
+  }
+  .controls {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+  }
+  .controls .primary {
+    background: var(--amber);
+    border-color: var(--amber);
+    color: #1d1405;
+    font-weight: 700;
+    min-width: 130px;
+  }
+  .controls .primary:hover { filter: brightness(1.05); }
+  .rounds {
+    text-align: center;
+    color: var(--muted);
+    margin-top: 14px;
+    font-size: .95rem;
+  }
+  .rounds strong { color: var(--text); }
+  .dots { display: inline-flex; gap: 5px; margin-inline-start: 8px; vertical-align: middle; }
+  .dots span {
+    width: 9px; height: 9px; border-radius: 50%;
+    background: var(--line);
+  }
+  .dots span.on { background: var(--amber); }
+
+  /* ---------- רשימות סימון (הרגלים ומשימות) ---------- */
+  .counter {
+    font-family: "Secular One", sans-serif;
+    font-size: 1.2rem;
+    color: var(--teal-text);
+    background: var(--teal-soft);
+    padding: 2px 12px;
+    border-radius: 99px;
+    direction: ltr;
+  }
+  .habits { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+  .habit { position: relative; }
+  .habit label {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    padding: 12px 14px;
+    border-radius: 12px;
+    border: 1px solid var(--line);
+    cursor: pointer;
+    transition: background .2s, border-color .2s;
+  }
+  .habit label:hover { border-color: var(--teal); }
+  .habit input { position: absolute; opacity: 0; pointer-events: none; }
+  .box {
+    flex: none;
+    width: 22px; height: 22px;
+    margin-top: 2px;
+    border-radius: 7px;
+    border: 2px solid var(--line);
+    background: var(--surface);
+    display: grid;
+    place-items: center;
+    transition: background .2s, border-color .2s;
+  }
+  .box svg { width: 14px; height: 14px; opacity: 0; transition: opacity .15s; }
+  .habit-title { font-weight: 700; display: block; overflow-wrap: anywhere; }
+  .habit-desc { color: var(--muted); font-size: .92rem; display: block; }
+  .habit input:checked ~ .box { background: var(--teal); border-color: var(--teal); }
+  .habit input:checked ~ .box svg { opacity: 1; }
+  .habit.done label { background: var(--teal-soft); border-color: transparent; }
+  .habit input:checked ~ span .habit-title {
+    text-decoration: line-through;
+    text-decoration-color: var(--teal);
+    text-decoration-thickness: 2px;
+    color: var(--teal-text);
+  }
+  .list-foot {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-top: 18px;
+    color: var(--muted);
+    font-size: .9rem;
+    flex-wrap: wrap;
+  }
+
+  /* משימות */
+  .task label { padding-inline-end: 52px; }
+  .icon-btn {
+    position: absolute;
+    inset-inline-end: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 36px; height: 36px;
+    padding: 0;
+    display: grid;
+    place-items: center;
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    border-radius: 8px;
+  }
+  .icon-btn:hover { color: var(--danger); background: var(--surface-2); }
+  .icon-btn svg { width: 18px; height: 18px; }
+  .time-tag {
+    display: inline-block;
+    font-size: .8rem;
+    font-weight: 600;
+    color: var(--amber-text);
+    background: var(--amber-soft);
+    border-radius: 99px;
+    padding: 0 8px;
+    margin-inline-start: 6px;
+    direction: ltr;
+    vertical-align: 1px;
+  }
+  .empty {
+    text-align: center;
+    color: var(--muted);
+    border: 1px dashed var(--line);
+    border-radius: 12px;
+    padding: 14px;
+    margin: 0;
+  }
+
+  /* ---------- תזכורות ---------- */
+  .rem-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+  .rem {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 52px 10px 14px;
+    padding-inline-start: 14px;
+    padding-inline-end: 52px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+  }
+  .rem-time {
+    font-family: "Secular One", sans-serif;
+    font-size: 1.1rem;
+    direction: ltr;
+    min-width: 52px;
+  }
+  .rem-text { flex: 1; overflow-wrap: anywhere; }
+  .rem.off .rem-time, .rem.off .rem-text { opacity: .45; }
+  .switch { position: relative; flex: none; width: 40px; height: 24px; }
+  .switch input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer; z-index: 1; }
+  .switch span {
+    position: absolute; inset: 0;
+    background: var(--line);
+    border-radius: 99px;
+    transition: background .2s;
+  }
+  .switch span::after {
+    content: "";
+    position: absolute;
+    top: 3px; right: 3px;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: #fff;
+    transition: transform .2s;
+  }
+  .switch input:checked + span { background: var(--teal); }
+  .switch input:checked + span::after { transform: translateX(-16px); }
+  .switch input:focus-visible + span { outline: 2px solid var(--amber); outline-offset: 2px; }
+  .notify-status { margin: 8px 0 0; }
+
+  .toast {
+    position: fixed;
+    bottom: 16px;
+    left: 50%;
+    transform: translate(-50%, 140%);
+    width: min(648px, calc(100% - 32px));
+    background: var(--text);
+    color: var(--bg);
+    border-radius: 14px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 8px 30px rgba(0,0,0,.25);
+    transition: transform .3s ease;
+    z-index: 10;
+  }
+  .toast.show { transform: translate(-50%, 0); }
+  .toast strong { font-family: "Secular One", sans-serif; font-weight: 400; color: var(--amber); }
+  .toast p { margin: 0; flex: 1; }
+  .toast button { background: transparent; color: inherit; border-color: currentColor; padding: 4px 12px; }
+
+  /* ---------- מדד השלמה ---------- */
+  .score-row {
+    display: flex;
+    gap: 24px;
+    align-items: center;
+    margin-top: 16px;
+    flex-wrap: wrap;
+  }
+  .ring { position: relative; width: 132px; height: 132px; flex: none; }
+  .ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+  .ring circle { fill: none; stroke-width: 12; }
+  .ring .track { stroke: var(--surface-2); }
+  .ring .fill { stroke: var(--teal); stroke-linecap: round; transition: stroke-dashoffset .5s ease; }
+  .ring-label {
+    position: absolute; inset: 0;
+    display: grid; place-content: center; text-align: center;
+  }
+  .ring-label strong { font-family: "Secular One", sans-serif; font-weight: 400; font-size: 2rem; line-height: 1; direction: ltr; }
+  .ring-label span { color: var(--muted); font-size: .85rem; }
+  .stats { flex: 1; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; min-width: 240px; }
+  .stat { background: var(--surface-2); border-radius: 12px; padding: 10px 12px; }
+  .stat-num { display: block; font-family: "Secular One", sans-serif; font-size: 1.5rem; line-height: 1.2; }
+  .stat-label { display: block; color: var(--muted); font-size: .82rem; line-height: 1.3; }
+  .breakdown { margin: 14px 0 0; }
+
+  .month-head {
+    display: flex; align-items: center; justify-content: space-between;
+    margin: 22px 0 10px;
+  }
+  .month-head h3 { margin: 0; color: var(--text); }
+  .month-head button { padding: 4px 8px; display: grid; place-items: center; }
+  .month-head button svg { width: 18px; height: 18px; }
+  .month-head button:disabled { opacity: .35; cursor: default; }
+  .cal { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
+  .cal .dow { text-align: center; color: var(--muted); font-size: .8rem; padding-bottom: 2px; }
+  .cal .day {
+    aspect-ratio: 1;
+    border-radius: 8px;
+    display: grid; place-items: center;
+    font-size: .85rem;
+    background: var(--surface-2);
+    color: var(--muted);
+  }
+  .cal .l1, .legend .l1 { background: color-mix(in srgb, var(--teal) 22%, var(--surface-2)); color: var(--text); }
+  .cal .l2, .legend .l2 { background: color-mix(in srgb, var(--teal) 45%, var(--surface-2)); color: var(--text); }
+  .cal .l3, .legend .l3 { background: color-mix(in srgb, var(--teal) 70%, var(--surface-2)); color: #fff; }
+  .cal .l4, .legend .l4 { background: var(--teal); color: #fff; font-weight: 700; }
+  .cal .future { opacity: .4; }
+  .cal .today { box-shadow: inset 0 0 0 2px var(--amber); }
+  .legend {
+    display: flex; align-items: center; justify-content: flex-end; gap: 4px;
+    margin-top: 10px; color: var(--muted); font-size: .8rem;
+  }
+  .legend i { width: 12px; height: 12px; border-radius: 3px; display: inline-block; background: var(--surface-2); }
+
+  /* ---------- למה זה עובד ---------- */
+  .why { background: var(--surface-2); }
+  .why dl { margin: 14px 0 0; }
+  .why dt { font-weight: 700; margin-top: 14px; }
+  .why dt:first-child { margin-top: 0; }
+  .why dd { margin: 2px 0 0; color: var(--muted); }
+
+  .note {
+    border-inline-start: 4px solid var(--amber);
+    padding: 12px 16px;
+    color: var(--muted);
+    font-size: .93rem;
+    background: var(--surface);
+    border-radius: 0 10px 10px 0;
+  }
+  .note strong { color: var(--text); }
+
+  @media (max-width: 480px) {
+    main { padding-top: 22px; }
+    .card { padding: 18px 16px; }
+    h1 { font-size: 1.8rem; }
+    .score-row { justify-content: center; }
+    .stats { min-width: 100%; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>המסגרת היומית שלי</h1>
+    <p class="subtitle">ריכוז טוב יותר ופחות עייפות — בצעדים קטנים, מבוססי מחקר.</p>
+    <p class="schedule"><span>קימה <b>05:00</b></span><span>קפה אחרון <b>13:00</b></span><span>מסכים כבים <b>20:30</b></span><span>שינה <b>21:30</b></span></p>
+  </header>
+
+  <!-- זמני תפילה -->
+  <section class="card" aria-labelledby="prayer-h">
+    <div class="card-head">
+      <h2 id="prayer-h">זמני תפילה</h2>
+      <span class="next-badge" id="prayer-next" aria-live="polite"></span>
+    </div>
+    <div class="prayer-settings">
+      <select id="prayer-city" aria-label="מיקום"></select>
+      <select id="prayer-method" aria-label="שיטת חישוב"></select>
+      <select id="prayer-asr" aria-label="חישוב זמן עסר">
+        <option value="1">עסר: שאפעי, מאלכי, חנבלי</option>
+        <option value="2">עסר: חנפי</option>
+      </select>
+    </div>
+    <ul class="prayers" id="prayer-list"></ul>
+    <p class="prayer-note small" id="prayer-note"></p>
+    <label class="toggle-row"><span class="switch"><input type="checkbox" id="prayer-remind"><span></span></span>תזכורת בכניסת זמן כל תפילה</label>
+    <p class="list-foot" id="prayer-source"></p>
+  </section>
+
+  <!-- טיימר -->
+  <section class="card" aria-labelledby="timer-h">
+    <h2 id="timer-h">טיימר ריכוז</h2>
+    <div class="modes" role="group" aria-label="מצב טיימר">
+      <button type="button" data-mode="focus" aria-pressed="true">ריכוז · 25</button>
+      <button type="button" data-mode="short" aria-pressed="false">הפסקה קצרה · 5</button>
+      <button type="button" data-mode="long" aria-pressed="false">הפסקה ארוכה · 15</button>
+    </div>
+    <div class="clock" id="clock">25:00</div>
+    <div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="progress"><div id="bar"></div></div>
+    <p class="hint" id="hint"></p>
+    <div class="controls">
+      <button type="button" class="primary" id="toggle">התחל</button>
+      <button type="button" id="reset">איפוס</button>
+    </div>
+    <p class="rounds">סבבי ריכוז שהושלמו היום: <strong id="done-count">0</strong><span class="dots" id="dots" aria-hidden="true"></span></p>
+  </section>
+
+  <!-- משימות -->
+  <section class="card" aria-labelledby="tasks-h">
+    <div class="card-head">
+      <h2 id="tasks-h">המשימות שלי</h2>
+      <span class="counter" id="task-count" aria-live="polite">0/0</span>
+    </div>
+    <form class="add-row" id="task-form" autocomplete="off">
+      <input type="text" id="task-text" maxlength="140" placeholder="משימה חדשה — ומה הצעד הראשון?" aria-label="משימה חדשה" required>
+      <input type="time" id="task-time" aria-label="שעת תזכורת (לא חובה)" title="שעת תזכורת (לא חובה)">
+      <button type="submit" class="btn-teal">הוספה</button>
+    </form>
+    <ul class="habits" id="task-list"></ul>
+    <p class="empty" id="task-empty">עדיין אין משימות. כדאי להתחיל ב-3 החשובות של היום.</p>
+    <p class="list-foot">משימות שלא הושלמו עוברות למחר. משימות שסומנו נמחקות בתחילת יום חדש. שעה היא לא חובה — אם נבחרה, תקבל/י תזכורת.</p>
+  </section>
+
+  <!-- הרגלים -->
+  <section class="card" aria-labelledby="habits-h">
+    <div class="card-head">
+      <h2 id="habits-h">ההרגלים של היום</h2>
+      <span class="counter" id="habit-count" aria-live="polite">0/0</span>
+    </div>
+    <div id="habit-groups"></div>
+    <div class="list-foot">
+      <span>הסימונים נשמרים בדפדפן ומתאפסים אוטומטית ביום חדש.</span>
+      <button type="button" id="clear">ניקוי סימונים</button>
+    </div>
+  </section>
+
+  <!-- תזכורות -->
+  <section class="card" aria-labelledby="rem-h">
+    <div class="card-head">
+      <h2 id="rem-h">תזכורות יומיות</h2>
+      <button type="button" id="notify-btn" hidden>הפעלת התראות</button>
+    </div>
+    <p class="notify-status small muted" id="notify-status"></p>
+    <form class="add-row" id="rem-form" autocomplete="off">
+      <input type="text" id="rem-text" maxlength="100" placeholder="מה להזכיר?" aria-label="טקסט התזכורת" required>
+      <input type="time" id="rem-time" aria-label="שעה" required>
+      <button type="submit" class="btn-teal">הוספה</button>
+    </form>
+    <ul class="rem-list" id="rem-list"></ul>
+    <p class="list-foot">התזכורות חוזרות כל יום ופועלות כל עוד העמוד פתוח (גם בלשונית ברקע).</p>
+  </section>
+
+  <!-- מדד השלמה -->
+  <section class="card" aria-labelledby="score-h">
+    <h2 id="score-h">מדד השלמה</h2>
+    <div class="score-row">
+      <div class="ring" role="img" id="ring" aria-label="השלמה היום">
+        <svg viewBox="0 0 132 132" aria-hidden="true">
+          <circle class="track" cx="66" cy="66" r="54"/>
+          <circle class="fill" id="ring-fill" cx="66" cy="66" r="54"/>
+        </svg>
+        <div class="ring-label"><strong id="day-pct">0%</strong><span>היום</span></div>
+      </div>
+      <div class="stats">
+        <div class="stat"><span class="stat-num" id="month-avg">—</span><span class="stat-label" id="month-avg-label">ממוצע החודש</span></div>
+        <div class="stat"><span class="stat-num" id="month-good">0</span><span class="stat-label">ימים מעל 80% החודש</span></div>
+        <div class="stat"><span class="stat-num" id="streak">0</span><span class="stat-label">רצף ימים מעל 50%</span></div>
+      </div>
+    </div>
+    <p class="breakdown small muted" id="breakdown"></p>
+
+    <div class="month-head">
+      <button type="button" id="prev-month" aria-label="החודש הקודם">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4l6 6-6 6"/></svg>
+      </button>
+      <h3 id="month-title"></h3>
+      <button type="button" id="next-month" aria-label="החודש הבא">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 4l-6 6 6 6"/></svg>
+      </button>
+    </div>
+    <div class="cal" id="cal"></div>
+    <div class="legend" aria-hidden="true">
+      פחות <i></i><i class="l1"></i><i class="l2"></i><i class="l3"></i><i class="l4"></i> יותר
+    </div>
+    <p class="list-foot">האחוז היומי = הרגלים ומשימות שסומנו מתוך כל ההרגלים והמשימות של היום.</p>
+  </section>
+
+  <!-- למה זה עובד -->
+  <section class="card why" aria-labelledby="why-h">
+    <h2 id="why-h">למה זה עובד</h2>
+    <dl>
+      <dt>שינה ← קליפת המוח הקדם-מצחית</dt>
+      <dd>חוסר שינה פוגע במיוחד בקליפה הקדם-מצחית — האזור שאחראי על קשב, תכנון ושליטה עצמית. גם לילה קצר אחד מוריד ביצועים, ושעות שינה וקימה קבועות משפרות את איכות השינה עצמה.</dd>
+
+      <dt>פעילות אירובית ← דופמין ונוראדרנלין</dt>
+      <dd>פעילות שמעלה דופק מגבירה שחרור של דופמין ונוראדרנלין, מוליכים עצביים שקשורים ישירות לקשב ולמוטיבציה. שיפור בריכוז נמדד כבר אחרי אימון בודד, ובטווח הארוך פעילות קבועה תומכת גם בבריאות המוח.</dd>
+
+      <dt>אור בוקר ← השעון הביולוגי</dt>
+      <dd>אור בהיר בשעות הבוקר הוא האות החזק ביותר לשעון הביולוגי. הוא מכייל אותו, מגביר ערנות במהלך היום ועוזר להפרשת מלטונין להתחיל בזמן בערב — כלומר להירדם בקלות.</dd>
+
+      <dt>חתיכות קצרות ← תגמול מיידי</dt>
+      <dd>משימה גדולה ועמומה מעוררת דחיינות. סבב של 25 דקות עם סוף ברור וצעד ראשון קטן מוריד את מחסום ההתחלה, וסימון והשלמה נותנים למוח משוב ותגמול מהירים. ההפסקות מונעות שחיקה של הקשב לאורך היום.</dd>
+
+      <dt>נוכחות הטלפון ← פחות קשב פנוי</dt>
+      <dd>במחקרים נמצא שעצם הימצאות הטלפון בטווח הראייה — גם כשהוא שקט והפוך — עלולה להוריד ביצועים במשימות של זיכרון עבודה, כי חלק מהקשב מוקדש להתעלם ממנו. הפתרון הפשוט: להוציא אותו מהחדר.</dd>
+    </dl>
+  </section>
+
+  <p class="note"><strong>שימו לב:</strong> אם יש עייפות קבועה למרות שינה טובה, כדאי לבדוק אצל רופא — ברזל, ויטמין D ו-B12, תפקוד בלוטת התריס, הפסקות נשימה בשינה (דום נשימה), ותזמון של תרופות קשב אם לוקחים כאלה.</p>
+</main>
+
+<div class="toast" id="toast" role="alert" aria-live="assertive">
+  <strong>תזכורת</strong>
+  <p id="toast-text"></p>
+  <button type="button" id="toast-close">סגירה</button>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  // ---------- כלים ----------
+  function dateKey(d) {
+    return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+  }
+  function todayKey() { return dateKey(new Date()); }
+  function load(key, fallback) {
+    try {
+      var raw = localStorage.getItem(key);
+      return raw ? JSON.parse(raw) : fallback;
+    } catch (e) { return fallback; }
+  }
+  function save(key, value) {
+    try { localStorage.setItem(key, JSON.stringify(value)); } catch (e) {}
+  }
+  function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+  function minutesOf(hhmm) { var p = hhmm.split(":"); return +p[0] * 60 + +p[1]; }
+
+  var CHECK_SVG = '<svg viewBox="0 0 16 16" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5l3.2 3L13 4.5"/></svg>';
+  var TRASH_SVG = '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h12M8 6V4h4v2M6 6l1 10h6l1-10"/></svg>';
+
+  // ---------- צליל ----------
+  var audioCtx = null;
+  function unlockAudio() {
+    try {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === "suspended") audioCtx.resume();
+    } catch (e) {}
+  }
+  document.addEventListener("click", unlockAudio);
+  function chime() {
+    if (!audioCtx) return;
+    try {
+      [0, 0.25, 0.5].forEach(function (offset, i) {
+        var o = audioCtx.createOscillator(), g = audioCtx.createGain();
+        o.type = "sine";
+        o.frequency.value = [660, 880, 990][i];
+        var t = audioCtx.currentTime + offset;
+        g.gain.setValueAtTime(0.0001, t);
+        g.gain.exponentialRampToValueAtTime(0.18, t + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + 0.6);
+        o.connect(g).connect(audioCtx.destination);
+        o.start(t);
+        o.stop(t + 0.65);
+      });
+    } catch (e) {}
+  }
+
+  // ---------- טיימר ----------
+  var MODES = {
+    focus: { minutes: 25, label: "ריכוז", hint: "משימה אחת. הטלפון בחדר אחר. מחשבה מסיחה? לרשום אותה ולחזור." },
+    short: { minutes: 5,  label: "הפסקה קצרה", hint: "קום, זוז, שתה מים. בלי טלפון." },
+    long:  { minutes: 15, label: "הפסקה ארוכה", hint: "הליכה קצרה, משהו לאכול, מנוחה לעיניים מכל מסך." }
+  };
+
+  var el = {
+    clock: document.getElementById("clock"),
+    bar: document.getElementById("bar"),
+    progress: document.getElementById("progress"),
+    hint: document.getElementById("hint"),
+    toggle: document.getElementById("toggle"),
+    reset: document.getElementById("reset"),
+    doneCount: document.getElementById("done-count"),
+    dots: document.getElementById("dots"),
+    modeBtns: document.querySelectorAll("[data-mode]")
+  };
+
+  var timer = { mode: "focus", remaining: MODES.focus.minutes * 60, endAt: null, interval: null };
+
+  var rounds = load("md-rounds", { date: todayKey(), count: 0 });
+  if (rounds.date !== todayKey()) rounds = { date: todayKey(), count: 0 };
+
+  function total() { return MODES[timer.mode].minutes * 60; }
+  function fmt(sec) {
+    var m = Math.floor(sec / 60), s = sec % 60;
+    return String(m).padStart(2, "0") + ":" + String(s).padStart(2, "0");
+  }
+
+  function renderTimer() {
+    el.clock.textContent = fmt(timer.remaining);
+    var pct = Math.round((1 - timer.remaining / total()) * 100);
+    el.bar.style.width = pct + "%";
+    el.progress.setAttribute("aria-valuenow", pct);
+    el.hint.textContent = MODES[timer.mode].hint;
+    el.toggle.textContent = timer.endAt ? "השהה" : (timer.remaining < total() ? "המשך" : "התחל");
+    el.modeBtns.forEach(function (b) {
+      b.setAttribute("aria-pressed", b.dataset.mode === timer.mode ? "true" : "false");
+    });
+    document.title = timer.endAt ? fmt(timer.remaining) + " · " + MODES[timer.mode].label : "המסגרת היומית שלי";
+  }
+
+  function renderRounds() {
+    el.doneCount.textContent = rounds.count;
+    var inSet = rounds.count % 4;
+    if (rounds.count > 0 && inSet === 0 && timer.mode === "long") inSet = 4;
+    el.dots.innerHTML = "";
+    for (var i = 0; i < 4; i++) {
+      var s = document.createElement("span");
+      if (i < inSet) s.className = "on";
+      el.dots.appendChild(s);
+    }
+  }
+
+  function tick() {
+    var left = Math.max(0, Math.ceil((timer.endAt - Date.now()) / 1000));
+    timer.remaining = left;
+    renderTimer();
+    if (left === 0) finish();
+  }
+  function start() {
+    if (timer.endAt) return;
+    unlockAudio();
+    timer.endAt = Date.now() + timer.remaining * 1000;
+    timer.interval = setInterval(tick, 250);
+    renderTimer();
+  }
+  function pause() {
+    if (!timer.endAt) return;
+    clearInterval(timer.interval);
+    timer.remaining = Math.max(0, Math.ceil((timer.endAt - Date.now()) / 1000));
+    timer.endAt = null;
+    renderTimer();
+  }
+  function setMode(mode) {
+    clearInterval(timer.interval);
+    timer.endAt = null;
+    timer.mode = mode;
+    timer.remaining = total();
+    renderTimer();
+    renderRounds();
+  }
+  function finish() {
+    clearInterval(timer.interval);
+    timer.endAt = null;
+    chime();
+    if (timer.mode === "focus") {
+      if (rounds.date !== todayKey()) rounds = { date: todayKey(), count: 0 };
+      rounds.count++;
+      save("md-rounds", rounds);
+      updateScore();
+      setMode(rounds.count % 4 === 0 ? "long" : "short");
+      start(); // ההפסקה מתחילה מעצמה
+    } else {
+      setMode("focus"); // סבב הריכוז הבא מתחיל בלחיצה
+    }
+  }
+
+  el.toggle.addEventListener("click", function () { timer.endAt ? pause() : start(); });
+  el.reset.addEventListener("click", function () { setMode(timer.mode); });
+  el.modeBtns.forEach(function (b) {
+    b.addEventListener("click", function () { setMode(b.dataset.mode); });
+  });
+
+  // ---------- משימות ----------
+  var tasks = load("md-tasks", { date: todayKey(), items: [] });
+  var taskList = document.getElementById("task-list");
+  var taskEmpty = document.getElementById("task-empty");
+  var taskCount = document.getElementById("task-count");
+
+  function saveTasks() { save("md-tasks", tasks); }
+
+  function renderTasks() {
+    taskList.innerHTML = "";
+    tasks.items.forEach(function (t) {
+      var li = document.createElement("li");
+      li.className = "habit task" + (t.done ? " done" : "");
+      li.innerHTML =
+        '<label><input type="checkbox"' + (t.done ? " checked" : "") + '>' +
+        '<span class="box">' + CHECK_SVG + '</span>' +
+        '<span><span class="habit-title"></span></span></label>' +
+        '<button type="button" class="icon-btn" aria-label="מחיקת משימה">' + TRASH_SVG + '</button>';
+      var title = li.querySelector(".habit-title");
+      title.textContent = t.text;
+      if (t.time) {
+        var tag = document.createElement("span");
+        tag.className = "time-tag";
+        tag.textContent = t.time;
+        title.appendChild(tag);
+      }
+      li.querySelector("input").addEventListener("change", function (e) {
+        t.done = e.target.checked;
+        li.classList.toggle("done", t.done);
+        saveTasks();
+        updateTaskCount();
+        updateScore();
+      });
+      li.querySelector(".icon-btn").addEventListener("click", function () {
+        tasks.items = tasks.items.filter(function (x) { return x.id !== t.id; });
+        saveTasks();
+        renderTasks();
+        updateScore();
+      });
+      taskList.appendChild(li);
+    });
+    taskEmpty.hidden = tasks.items.length > 0;
+    updateTaskCount();
+  }
+  function updateTaskCount() {
+    var done = tasks.items.filter(function (t) { return t.done; }).length;
+    taskCount.textContent = done + "/" + tasks.items.length;
+  }
+
+  document.getElementById("task-form").addEventListener("submit", function (e) {
+    e.preventDefault();
+    var textEl = document.getElementById("task-text"), timeEl = document.getElementById("task-time");
+    var text = textEl.value.trim();
+    if (!text) return;
+    tasks.items.push({ id: uid(), text: text, time: timeEl.value || "", done: false });
+    saveTasks();
+    textEl.value = "";
+    timeEl.value = "";
+    renderTasks();
+    updateScore();
+    textEl.focus();
+  });
+
+  // ---------- הרגלים ----------
+  var HABITS = [
+    { part: "בוקר", items: [
+      { id: "wake", title: "לקום ב-05:00", desc: "כל יום, גם בסופ״ש, בטווח של חצי שעה. העקביות חשובה יותר מהשעה עצמה." },
+      { id: "light", title: "10 דקות אור יום בחוץ", desc: "ב-05:00 עוד חשוך רוב השנה — עד הזריחה אור חזק בבית, ואז לצאת החוצה." },
+      { id: "breakfast", title: "ארוחת בוקר עם חלבון ומים", desc: "ביצים, יוגורט, גבינה או טופו, וכוס מים גדולה. אנרגיה יציבה בלי נפילה." },
+      { id: "three", title: "לכתוב 3 משימות חשובות", desc: "לכל אחת צעד ראשון קטן, פחות מ-5 דקות, כדי שיהיה קל להתחיל." }
+    ]},
+    { part: "שעות העבודה", items: [
+      { id: "phone-first", title: "סבב ריכוז ראשון לפני הטלפון", desc: "בלי הודעות ורשתות עד שהסבב הראשון נגמר." },
+      { id: "four-rounds", title: "4 סבבים של 25 דקות", desc: "עם הפסקות תנועה ביניהם: לקום, להתמתח, ללכת." },
+      { id: "water", title: "לשתות מים", desc: "בקבוק על השולחן. גם התייבשות קלה פוגעת בריכוז." },
+      { id: "coffee", title: "קפה רק עד 13:00", desc: "עם שינה ב-21:30, זה נותן לקפאין כ-8.5 שעות להתפנות מהגוף." }
+    ]},
+    { part: "אחר הצהריים", items: [
+      { id: "exercise", title: "20–30 דקות פעילות גופנית", desc: "הליכה מהירה, ריצה, אופניים או אימון. אימון עצים — עדיף לסיים עד 18:30." },
+      { id: "reward", title: "תגמול קטן על מה שהושלם", desc: "משהו נעים שנקבע מראש. סוגר את המעגל בין מאמץ להנאה." }
+    ]},
+    { part: "ערב", items: [
+      { id: "prep", title: "להכין את מחר", desc: "ב-20:00: לבחור את המשימות של מחר ולפנות את השולחן. חמש דקות." },
+      { id: "screens", title: "לכבות מסכים ב-20:30", desc: "הטלפון מחוץ לחדר השינה. ספר, מקלחת, אור עמום." },
+      { id: "sleep", title: "לישון ב-21:30", desc: "כך יוצאות 7.5 שעות שינה עד 05:00. אחרי 22:00 כבר יוצא פחות מ-7." }
+    ]}
+  ];
+
+  var habitState = load("md-habits", { date: todayKey(), checked: {} });
+  var habitCount = document.getElementById("habit-count");
+  var groupsEl = document.getElementById("habit-groups");
+  var totalHabits = HABITS.reduce(function (n, g) { return n + g.items.length; }, 0);
+
+  function habitsDone() {
+    return HABITS.reduce(function (n, g) {
+      return n + g.items.filter(function (i) { return habitState.checked[i.id]; }).length;
+    }, 0);
+  }
+  function updateHabitCount() { habitCount.textContent = habitsDone() + "/" + totalHabits; }
+
+  function renderHabits() {
+    groupsEl.innerHTML = "";
+    HABITS.forEach(function (group) {
+      var h = document.createElement("h3");
+      h.textContent = group.part;
+      var ul = document.createElement("ul");
+      ul.className = "habits";
+      group.items.forEach(function (item) {
+        var li = document.createElement("li");
+        li.className = "habit";
+        var checked = !!habitState.checked[item.id];
+        if (checked) li.classList.add("done");
+        li.innerHTML =
+          '<label><input type="checkbox"' + (checked ? " checked" : "") + '>' +
+          '<span class="box">' + CHECK_SVG + '</span>' +
+          '<span><span class="habit-title"></span><span class="habit-desc"></span></span></label>';
+        li.querySelector(".habit-title").textContent = item.title;
+        li.querySelector(".habit-desc").textContent = item.desc;
+        li.querySelector("input").addEventListener("change", function (e) {
+          checkNewDay();
+          habitState.checked[item.id] = e.target.checked;
+          li.classList.toggle("done", e.target.checked);
+          save("md-habits", habitState);
+          updateHabitCount();
+          updateScore();
+        });
+        ul.appendChild(li);
+      });
+      groupsEl.appendChild(h);
+      groupsEl.appendChild(ul);
+    });
+    updateHabitCount();
+  }
+
+  document.getElementById("clear").addEventListener("click", function () {
+    habitState = { date: todayKey(), checked: {} };
+    save("md-habits", habitState);
+    renderHabits();
+    updateScore();
+  });
+
+  // ---------- תזכורות ----------
+  // תזכורות ברירת מחדל לפי קימה ב-05:00
+  var DEFAULT_REMINDERS = [
+    { text: "לצאת ל-10 דקות אור יום", time: "06:30" },
+    { text: "לשתות כוס מים", time: "11:00" },
+    { text: "קפה אחרון להיום — עד 13:00", time: "12:45" },
+    { text: "20–30 דקות פעילות גופנית", time: "17:00" },
+    { text: "להכין את מחר", time: "20:00" },
+    { text: "לכבות מסכים", time: "20:30" },
+    { text: "לקראת שינה — אורות כבים ב-21:30", time: "21:15" }
+  ];
+  // ברירות המחדל של הגרסה הקודמת — מוחלפות פעם אחת, תזכורות שהוספת בעצמך נשארות
+  var OLD_DEFAULTS = ["לשתות כוס מים|11:00", "קפה אחרון להיום — עד 14:00|13:45",
+    "20–30 דקות פעילות גופנית|17:30", "לכבות מסכים ולהתכונן לשינה|22:00"];
+  var reminders = load("md-reminders", null);
+  if (!reminders || load("md-reminders-v", 1) < 2) {
+    var kept = (reminders || []).filter(function (r) { return OLD_DEFAULTS.indexOf(r.text + "|" + r.time) === -1; });
+    reminders = DEFAULT_REMINDERS.map(function (r) { return { id: uid(), text: r.text, time: r.time, on: true }; }).concat(kept);
+    save("md-reminders", reminders);
+    save("md-reminders-v", 2);
+  }
+  var fired = load("md-fired", { date: todayKey(), ids: {} });
+  if (fired.date !== todayKey()) fired = { date: todayKey(), ids: {} };
+
+  var remList = document.getElementById("rem-list");
+  var notifyBtn = document.getElementById("notify-btn");
+  var notifyStatus = document.getElementById("notify-status");
+  var toast = document.getElementById("toast");
+  var toastText = document.getElementById("toast-text");
+  var toastTimer = null;
+
+  function saveReminders() { save("md-reminders", reminders); }
+
+  function renderReminders() {
+    reminders.sort(function (a, b) { return minutesOf(a.time) - minutesOf(b.time); });
+    remList.innerHTML = "";
+    reminders.forEach(function (r) {
+      var li = document.createElement("li");
+      li.className = "rem" + (r.on ? "" : " off");
+      li.innerHTML =
+        '<label class="switch"><input type="checkbox"' + (r.on ? " checked" : "") + '><span></span></label>' +
+        '<span class="rem-time"></span><span class="rem-text"></span>' +
+        '<button type="button" class="icon-btn" aria-label="מחיקת תזכורת">' + TRASH_SVG + '</button>';
+      li.querySelector(".rem-time").textContent = r.time;
+      li.querySelector(".rem-text").textContent = r.text;
+      var sw = li.querySelector(".switch input");
+      sw.setAttribute("aria-label", "הפעלת התזכורת: " + r.text);
+      sw.addEventListener("change", function () {
+        r.on = sw.checked;
+        li.classList.toggle("off", !r.on);
+        saveReminders();
+      });
+      li.querySelector(".icon-btn").addEventListener("click", function () {
+        reminders = reminders.filter(function (x) { return x.id !== r.id; });
+        saveReminders();
+        renderReminders();
+      });
+      remList.appendChild(li);
+    });
+  }
+
+  document.getElementById("rem-form").addEventListener("submit", function (e) {
+    e.preventDefault();
+    var textEl = document.getElementById("rem-text"), timeEl = document.getElementById("rem-time");
+    var text = textEl.value.trim();
+    if (!text || !timeEl.value) return;
+    reminders.push({ id: uid(), text: text, time: timeEl.value, on: true });
+    saveReminders();
+    textEl.value = "";
+    timeEl.value = "";
+    renderReminders();
+  });
+
+  function renderNotifyState() {
+    if (!("Notification" in window)) {
+      notifyBtn.hidden = true;
+      notifyStatus.textContent = "הדפדפן לא תומך בהתראות — התזכורות יופיעו בתוך העמוד עם צליל.";
+      return;
+    }
+    var p = Notification.permission;
+    notifyBtn.hidden = p !== "default";
+    notifyStatus.textContent =
+      p === "granted" ? "התראות הדפדפן פעילות ✓" :
+      p === "denied" ? "התראות הדפדפן חסומות — התזכורות יופיעו בתוך העמוד עם צליל." :
+      "אפשר להפעיל התראות דפדפן כדי לקבל תזכורת גם כשהעמוד ברקע.";
+  }
+  notifyBtn.addEventListener("click", function () {
+    try {
+      var res = Notification.requestPermission(renderNotifyState);
+      if (res && res.then) res.then(renderNotifyState);
+    } catch (e) { renderNotifyState(); }
+  });
+
+  function notify(text) {
+    chime();
+    toastText.textContent = text;
+    toast.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { toast.classList.remove("show"); }, 15000);
+    if ("Notification" in window && Notification.permission === "granted") {
+      try { new Notification("המסגרת היומית שלי", { body: text, tag: text }); } catch (e) {}
+    }
+  }
+  document.getElementById("toast-close").addEventListener("click", function () {
+    toast.classList.remove("show");
+  });
+
+  // מפעיל תזכורת רק בחלון של 5 דקות אחרי השעה — כך פתיחת העמוד באמצע היום לא מציפה תזכורות ישנות
+  function checkReminders() {
+    var now = new Date();
+    var nowMin = now.getHours() * 60 + now.getMinutes();
+    var due = [];
+    reminders.forEach(function (r) {
+      if (r.on) due.push({ key: "r:" + r.id, time: r.time, text: r.text });
+    });
+    tasks.items.forEach(function (t) {
+      if (t.time && !t.done) due.push({ key: "t:" + t.id, time: t.time, text: "משימה: " + t.text });
+    });
+    if (prayerCfg.remind) {
+      PRAYERS.forEach(function (p) {
+        if (!p.info && todayPrayers[p.id]) due.push({ key: "p:" + p.id, time: todayPrayers[p.id], text: "הגיע זמן תפילת " + p.he + " · " + p.ar });
+      });
+    }
+    due.forEach(function (d) {
+      var diff = nowMin - minutesOf(d.time);
+      if (diff >= 0 && diff <= 5 && !fired.ids[d.key]) {
+        fired.ids[d.key] = true;
+        save("md-fired", fired);
+        notify(d.text);
+      }
+    });
+  }
+
+  // ---------- זמני תפילה ----------
+  var CITIES = [
+    ["rahat", "רהט", 31.3925, 34.7544],
+    ["jerusalem", "ירושלים", 31.7683, 35.2137],
+    ["nazareth", "נצרת", 32.6996, 35.3035],
+    ["haifa", "חיפה", 32.7940, 34.9896],
+    ["jaffa", "תל אביב-יפו", 32.0853, 34.7818],
+    ["acre", "עכו", 32.9281, 35.0818],
+    ["shefaram", "שפרעם", 32.8056, 35.1696],
+    ["sakhnin", "סח'נין", 32.8646, 35.2973],
+    ["tamra", "טמרה", 32.8536, 35.1977],
+    ["ummelfahm", "אום אל-פחם", 32.5194, 35.1536],
+    ["tayibe", "טייבה", 32.2662, 35.0099],
+    ["qalansawe", "קלנסווה", 32.2849, 34.9817],
+    ["lod", "לוד", 31.9510, 34.8881],
+    ["ramla", "רמלה", 31.9293, 34.8664],
+    ["beersheba", "באר שבע", 31.2520, 34.7915]
+  ];
+  var METHODS = {
+    faruq: { name: "לוח מסגד אל-פארוק, רהט", table: true },
+    mwl: { name: "הליגה המוסלמית העולמית (18° / 17°)", fajr: 18, isha: 17 },
+    egypt: { name: "הרשות המצרית (19.5° / 17.5°)", fajr: 19.5, isha: 17.5 },
+    makkah: { name: "אום אל-קורא, מכה (18.5° / 90 דק׳)", fajr: 18.5, ishaMin: 90 },
+    karachi: { name: "קראצ'י (18° / 18°)", fajr: 18, isha: 18 },
+    isna: { name: "ISNA, צפון אמריקה (15° / 15°)", fajr: 15, isha: 15 }
+  };
+  var PRAYERS = [
+    { id: "fajr", he: "פג'ר", ar: "الفجر" },
+    { id: "sunrise", he: "זריחה", ar: "الشروق", info: true },
+    { id: "dhuhr", he: "ד'והר", ar: "الظهر" },
+    { id: "asr", he: "עסר", ar: "العصر" },
+    { id: "maghrib", he: "מע'רב", ar: "المغرب" },
+    { id: "isha", he: "עישא", ar: "العشاء" }
+  ];
+  var prayerCfg = load("md-prayer", null);
+  if (prayerCfg && load("md-prayer-v", 1) < 3) {
+    // ברהט: עוברים ללוח של מסגד אל-פארוק
+    prayerCfg.city = "rahat"; prayerCfg.lat = 31.3925; prayerCfg.lng = 34.7544; prayerCfg.method = "faruq";
+    save("md-prayer", prayerCfg);
+    save("md-prayer-v", 3);
+  }
+  if (!prayerCfg) {
+    // ברירת מחדל: רהט
+    prayerCfg = { city: "rahat", lat: 31.3925, lng: 34.7544, method: "faruq", asr: 1, remind: true };
+    save("md-prayer", prayerCfg);
+    save("md-prayer-v", 3);
+  }
+
+  // חישוב אסטרונומי סטנדרטי (מיקום השמש, זווית מתחת לאופק, אורך צל לעסר)
+  var RAD = Math.PI / 180;
+  function sinD(d) { return Math.sin(d * RAD); }
+  function cosD(d) { return Math.cos(d * RAD); }
+  function tanD(d) { return Math.tan(d * RAD); }
+  function asinD(x) { return Math.asin(x) / RAD; }
+  function acosD(x) { return Math.acos(Math.max(-1, Math.min(1, x))) / RAD; }
+  function atan2D(y, x) { return Math.atan2(y, x) / RAD; }
+  function acotD(x) { return Math.atan(1 / x) / RAD; }
+  function fix(a, b) { a = a - b * Math.floor(a / b); return a < 0 ? a + b : a; }
+
+  function sunPosition(jd) {
+    var D = jd - 2451545.0;
+    var g = fix(357.529 + 0.98560028 * D, 360);
+    var q = fix(280.459 + 0.98564736 * D, 360);
+    var L = fix(q + 1.915 * sinD(g) + 0.020 * sinD(2 * g), 360);
+    var e = 23.439 - 0.00000036 * D;
+    var RA = fix(atan2D(cosD(e) * sinD(L), cosD(L)) / 15, 24);
+    return { decl: asinD(sinD(e) * sinD(L)), eqt: q / 15 - RA };
+  }
+
+  function isRamadan(date) {
+    try {
+      var parts = new Intl.DateTimeFormat("en-u-ca-islamic-umalqura", { month: "numeric" }).formatToParts(date);
+      return parts.some(function (p) { return p.type === "month" && p.value === "9"; });
+    } catch (e) { return false; }
+  }
+
+  // לוח הזמנים של מסגד אל-פארוק ברהט מ-Mawaqit (נשלף ב-10.10.2026), שמור בשעון חורף (UTC+2).
+  // שורה לכל יום: פג'ר, זריחה, ד'והר, עסר, מע'רב, עישא — 4 ספרות HHMM לכל זמן. חודשים מופרדים ב-|.
+  var FARUQ = "051406381144142916541815,051406381145143016551815,051406381145143116561816,051406381146143216571817,051506391146143216571817,051506391146143316581818,051506391147143416591819,051506391147143417001819,051506391148143517011820,051506391148143617021821,051506391148143717031822,051506391149143717041822,051506391149143817051823,051506391150143817061824,051506391150144017061825,051506381150144117071825,051506381151144117081826,051506381151144217091827,051506391151144317101828,051506371152144417111828,051506371152144417121829,051406371152144517131830,051406371152144617131831,051406361153144717131832,051406361153144817141832,051306361153144817151833,051306351153144917161834,051306341154145017171835,051206341154145117181835,051206331154145117191836,051106331154145217201837|051106321154145317201838,051006311154145417211838,051006311154145417221839,050906301155145517231840,050806291155145617241841,050806291155145617251842,050706281155145717261842,050706271155145817271843,050606261155145817281844,050506251155145917281845,050406251155150017291845,050406241155150017301846,050306231155150117311847,050206221155150217321848,050106211155150217331848,050006201155150317331849,045906191155150317341850,045906181155150417351851,045806171155150517361851,045706161154150517371852,045606151154150617381853,045506141154150617381854,045406131154150717391854,045306121154150717401855,045206111154150817411856,045106101154150817421857,045006091153150917421857,044806071153150917431858,044806071153150917441858|044606051153151017451900,044506041153151017461900,044406031153151117461901,044306021152151117471902,044206001152151217481903,044005591152151217491903,043905581152151217491904,043805571151151317501905,043705561151151317511906,043605541151151317521906,043405531151151417521907,043305521150151417531908,043205511150151417541909,043005491150151417551910,042905481150151517551910,042805471149151517561911,042605451149151517571912,042505441149151517571913,042405431148151617581913,042205421148151617591914,042105401148151618001915,041905391148151618001916,041805381147151618011916,041705361147151618021917,041505351147151718021918,041405341146151718031919,041205321146151718041920,041105311146151718041921,041005301145151718051921,040805291145151718061922,040705271145151718071923|040505261145151718071924,040405251144151718081925,040205231144151718091926,040105221144151818091926,040005211143151818101927,035805201143151818111928,035705181143151818111929,035505171143151818121930,035405161142151818131931,035205151142151818131932,035105131142151818141932,035005121141151818151933,034805111141151818151934,034705101141151818161935,034505091141151818171936,034405071141151818181937,034305061140151818181938,034105051140151818191939,034005041140151818201940,033805031140151818201941,033705021139151818211942,033605011139151818221943,033405001139151818221943,033304591139151818231944,033204571139151818241945,033104561138151718241946,032904551138151718251947,032804541138151718261948,032704531138151718271949,032604521138151718271950|032404521138151718281951,032304511138151718291952,032204501137151718291953,032104491137151718301954,032004481137151718311955,031804471137151718311956,031704461137151718321957,031604451137151718331958,031504451137151718331959,031404441137151718342000,031304431137151718351901,031204421137151718362002,031104421137151718362003,031004411137151718372004,030904401137151718382005,030804401137151718382006,030804391137151718392006,030704391137151718392007,030604381137151818402008,030504371137151818412009,030404371137151818412010,030404361137151818422011,030304361137151818432012,030204361137151818432013,030104351137151818442013,030104351138151818442014,030004341138151818452015,030004341138151818462016,025904341138151818462017,025904331138151818472017,025804331138151918472018|025804331138151918482019,025704331139151918482020,025704321139151918492020,025704321139151918492021,025604321139151918502022,025604321139151918502022,025604321139152018512023,025604321140152018512023,025504321140152018522024,025504321140152018522025,025504321140152018522025,025504321140152118532026,025504321141152118532026,025504321141152118542026,025504321141152118542027,025504321141152118542027,025504321141152218552028,025504321142152218552028,025604331142152218552028,025604331142152218552028,025604331142152218562029,025604341143152318562029,025704341143152318562029,025704341143152318562029,025704341143152318562029,025804341143152318562029,025804351144152418562029,025804351144152418562029,025904351144152418562029,025904361144152418562029|030004361144152518562029,030004371145152518562029,030104371145152518562029,030104381145152518562028,030204381145152518562028,030304381145152618562028,030304391145152618562028,030404391146152618562027,030504401146152618562027,030504401146152618552026,030604411146152618552026,030704421146152718552026,030804421146152718552025,030804431146152718542024,030904431147152718542024,031004441147152718532023,031104441147152718532023,031204451147152718532022,031204461147152718522021,031304461147152718522021,031404471147152718512020,031504471147152718512019,031604481147152818502018,031704491147152818502017,031804491147152818492017,031904501147152818482016,031904511147152818482015,032004511147152818472014,032104521147152818462013,032204521147152818462012,032304531147152718452011|032404541147152718442010,032504541147152718432009,032604551147152718432008,032704561147152718422007,032804561147152718412005,032904571147152618402004,033004581146152618392003,033104581146152618382002,033104591146152618372001,033205001146152618362000,033305001146152518351958,033405011146152518341957,033505021146152518331956,033605021145152518321955,033705031145152418311953,033805041145152418301952,033905041145152318291943,034005051145152318281951,034105061144152318271949,034105061144152218261948,034205071144152218251945,034305071144152118241944,034405081143152118231942,034505091143152118211941,034605091143152018201940,034705101142152018201938,034805111142151918191937,034805111142151918191935,034905121142151818181934,035005131141151718171933,035105131141151718171931|035205141141151618121930,035305141140151618101928,035305151140151518091927,035405161140151418081925,035505161139151418061924,035605171139151318051922,035705181139151218041921,035705181138151218031919,035805191138151118011918,035905191138151018001916,040005201137151017591915,040005211137150917571914,040105211137150817561912,040205221136150717551911,040305231136150717531909,040305231136150617521908,040405241135150517511906,040505241135150417491905,040605251135150317481903,040605261134150317471902,040705261134150217451901,040805271133150117441859,040805281133150017421858,040905281133145917411856,041005291132145817401855,041105301132145817381854,041105301132145717371852,041205311131145617361851,041305321131145517351849,041405321131145417341848|041405331130145317321847,041505341130145217311845,041505341130145117291844,041605351129145117281843,041705361129145017271842,041705361129144917251840,041805371129144817241839,041905381128144717231838,041905381128144617221837,042005391128144517201835,042105401127144417191834,042105401127144417181833,042205411127144317171832,042305421127144217161831,042305421126144117151830,042405431126144017131828,042505441126143917121827,042505451126143917111826,042605451126143817101825,042705461125143717091824,042705471125143617081823,042805481125143517071822,042905481125143417061821,043005491125143417051820,043005501125143317041819,043105511125143217031818,043205511125143117021817,043205521124143117011817,043305531124143017001816,043405541124142916591815,043405551124142916581814|043505551124142816571813,043605561124142716561813,043605571124142716551812,043705581124142616551811,043805591124142516541811,043905591124142516531810,043906001124142416521809,044006011124142416521809,044106021124142316511808,044106031125142316501808,044206041125142216501807,044306041125142216491807,044406051125142116491806,044406061125142116481806,044506071125142016471805,044606081125142016471805,044706091126141916471805,044706091126141916461804,044806101126141916461804,044906111126141916451804,044906121126141816451803,045006131127141816451803,045106141127141816441803,045206141127141816441803,045206151128141816441803,045306161128141816441803,045406171128141816431803,045406181129141816431803,045506191129141816431803,045606191129141816431803|045706201130141816431803,045706211130141816431803,045806221130141816431803,045906221131141816431803,045906231131141816431803,050006241132141816431803,050106251132141816431803,050106251132141816431804,050206261133141916441804,050306271133141916441804,050306281134141916441804,050406281134141916441805,050506291135142016451805,050506301135142016451805,050606301136142016451806,050606311136142116461806,050706311137142116461806,050706321137142116461807,050806321138142216471807,050806331138142216471808,050906341139142316481808,050906341139142316481809,051006341140142416491809,051006351140142416491810,051106351141142516501810,051106361141142616501811,051206361142142616511812,051206361142142716521812,051206371143142716521813,051306371143142816531813,051306371144142916541814".split("|").map(function (m) { return m.split(","); });
+  // הפרש האקאמה (בדקות) לפי הגדרות המסגד: פג'ר, ד'והר, עסר, מע'רב, עישא
+  var FARUQ_IQAMA = { fajr: 20, dhuhr: 15, asr: 15, maghrib: 10, isha: 12 };
+  var PRAYER_KEYS = ["fajr", "sunrise", "dhuhr", "asr", "maghrib", "isha"];
+
+  function hhmm(mins) {
+    mins = ((mins % 1440) + 1440) % 1440;
+    return String(Math.floor(mins / 60)).padStart(2, "0") + ":" + String(mins % 60).padStart(2, "0");
+  }
+
+  function faruqTimes(date) {
+    var row = FARUQ[date.getMonth()][date.getDate() - 1] || FARUQ[date.getMonth()][27];
+    // ממיר משעון חורף לשעון המקומי של אותו יום (שעון קיץ מוסיף שעה)
+    var shift = -new Date(date.getFullYear(), date.getMonth(), date.getDate(), 12).getTimezoneOffset() - 120;
+    var out = {};
+    PRAYER_KEYS.forEach(function (k, i) {
+      var v = row.substr(i * 4, 4);
+      out[k] = hhmm(+v.slice(0, 2) * 60 + +v.slice(2) + shift);
+    });
+    return out;
+  }
+
+  function prayerTimes(date, lat, lng, methodId, asrFactor) {
+    if (methodId === "faruq") return faruqTimes(date);
+    var y = date.getFullYear(), m = date.getMonth() + 1, d = date.getDate();
+    if (m <= 2) { y--; m += 12; }
+    var A = Math.floor(y / 100), B = 2 - A + Math.floor(A / 4);
+    var jd = Math.floor(365.25 * (y + 4716)) + Math.floor(30.6001 * (m + 1)) + d + B - 1524.5 - lng / (15 * 24);
+    function midDay(t) { return fix(12 - sunPosition(jd + t).eqt, 24); }
+    function angleTime(angle, t, ccw) {
+      var decl = sunPosition(jd + t).decl;
+      var T = acosD((-sinD(angle) - sinD(decl) * sinD(lat)) / (cosD(decl) * cosD(lat))) / 15;
+      return midDay(t) + (ccw ? -T : T);
+    }
+    function asrTime(t) {
+      var decl = sunPosition(jd + t).decl;
+      return angleTime(-acotD(asrFactor + tanD(Math.abs(lat - decl))), t);
+    }
+    var M = METHODS[methodId] || METHODS.mwl;
+    // שני סבבים: הראשון לפי שעות משוערות, השני לפי תוצאות הראשון — לדיוק של דקה
+    var t = { fajr: 5, sunrise: 6, dhuhr: 12, asr: 13, maghrib: 18, isha: 18 };
+    for (var pass = 0; pass < 2; pass++) {
+      t = {
+        fajr: angleTime(M.fajr, t.fajr / 24, true),
+        sunrise: angleTime(0.833, t.sunrise / 24, true),
+        dhuhr: midDay(t.dhuhr / 24),
+        asr: asrTime(t.asr / 24),
+        maghrib: angleTime(0.833, t.maghrib / 24),
+        isha: M.isha ? angleTime(M.isha, t.isha / 24) : 0
+      };
+    }
+    // באום אל-קורא העישא 90 דק׳ אחרי המע'רב, וברמדאן 120 דק׳
+    if (M.ishaMin) t.isha = t.maghrib + (isRamadan(date) ? 120 : M.ishaMin) / 60;
+    var tz = -new Date(date.getFullYear(), date.getMonth(), date.getDate(), 12).getTimezoneOffset() / 60;
+    var out = {};
+    Object.keys(t).forEach(function (k) {
+      var mins = Math.round(fix(t[k] + tz - lng / 15, 24) * 60) % 1440;
+      out[k] = String(Math.floor(mins / 60)).padStart(2, "0") + ":" + String(mins % 60).padStart(2, "0");
+    });
+    return out;
+  }
+
+  var prayerList = document.getElementById("prayer-list");
+  var prayerNext = document.getElementById("prayer-next");
+  var prayerNote = document.getElementById("prayer-note");
+  var citySel = document.getElementById("prayer-city");
+  var methodSel = document.getElementById("prayer-method");
+  var asrSel = document.getElementById("prayer-asr");
+  var remindSw = document.getElementById("prayer-remind");
+  var todayPrayers = {};
+  var geoMsg = "";
+
+  function buildPrayerSettings() {
+    CITIES.forEach(function (c) {
+      var o = document.createElement("option");
+      o.value = c[0]; o.textContent = c[1];
+      citySel.appendChild(o);
+    });
+    var g = document.createElement("option");
+    g.value = "geo"; g.textContent = "המיקום הנוכחי שלי";
+    citySel.appendChild(g);
+    Object.keys(METHODS).forEach(function (k) {
+      var o = document.createElement("option");
+      o.value = k; o.textContent = METHODS[k].name;
+      methodSel.appendChild(o);
+    });
+    citySel.value = prayerCfg.city;
+    methodSel.value = prayerCfg.method;
+    asrSel.value = String(prayerCfg.asr);
+    remindSw.checked = !!prayerCfg.remind;
+  }
+
+  function savePrayer() { save("md-prayer", prayerCfg); renderPrayers(); }
+
+  citySel.addEventListener("change", function () {
+    if (citySel.value !== "geo") {
+      var c = CITIES.filter(function (x) { return x[0] === citySel.value; })[0];
+      prayerCfg.city = c[0]; prayerCfg.lat = c[2]; prayerCfg.lng = c[3];
+      geoMsg = "";
+      savePrayer();
+      return;
+    }
+    if (!navigator.geolocation) {
+      geoMsg = "הדפדפן לא מאפשר איתור מיקום. אפשר לבחור את העיר הקרובה מהרשימה.";
+      citySel.value = prayerCfg.city;
+      renderPrayers();
+      return;
+    }
+    geoMsg = "מאתר מיקום…";
+    renderPrayers();
+    navigator.geolocation.getCurrentPosition(function (pos) {
+      prayerCfg.city = "geo";
+      prayerCfg.lat = pos.coords.latitude;
+      prayerCfg.lng = pos.coords.longitude;
+      geoMsg = "";
+      savePrayer();
+    }, function () {
+      geoMsg = "לא הצלחתי לאתר מיקום. אפשר לבחור את העיר הקרובה מהרשימה.";
+      citySel.value = prayerCfg.city;
+      renderPrayers();
+    }, { timeout: 15000, maximumAge: 24 * 3600 * 1000 });
+  });
+  methodSel.addEventListener("change", function () { prayerCfg.method = methodSel.value; savePrayer(); });
+  asrSel.addEventListener("change", function () { prayerCfg.asr = +asrSel.value; savePrayer(); });
+  remindSw.addEventListener("change", function () { prayerCfg.remind = remindSw.checked; save("md-prayer", prayerCfg); });
+
+  function renderPrayers() {
+    var now = new Date();
+    var nowMin = now.getHours() * 60 + now.getMinutes();
+    todayPrayers = prayerTimes(now, prayerCfg.lat, prayerCfg.lng, prayerCfg.method, prayerCfg.asr);
+    var isFaruq = prayerCfg.method === "faruq";
+    citySel.disabled = asrSel.disabled = isFaruq;
+    document.getElementById("prayer-source").textContent = isFaruq
+      ? "הזמנים לקוחים מלוח מסגד אל-פארוק ברהט (Mawaqit), כולל זמני האקאמה. ביום שישי, הג'ומעה בזמן הד'והר. מיקום ושיטת עסר לא רלוונטיים ללוח הזה."
+      : "הזמנים מחושבים אסטרונומית לפי המיקום והשיטה שנבחרו, ועלולים להיות שונים בכמה דקות מלוח המסגד.";
+
+    var next = null;
+    PRAYERS.forEach(function (p) {
+      if (!p.info && !next && minutesOf(todayPrayers[p.id]) > nowMin) next = p;
+    });
+
+    prayerList.innerHTML = "";
+    PRAYERS.forEach(function (p) {
+      var li = document.createElement("li");
+      var past = minutesOf(todayPrayers[p.id]) <= nowMin;
+      li.className = "prayer" + (p.info ? " info" : "") + (p === next ? " next" : (past ? " past" : ""));
+      li.innerHTML = '<span class="prayer-name"><span></span><span lang="ar" dir="rtl"></span></span><span class="prayer-time"></span>';
+      var friday = p.id === "dhuhr" && now.getDay() === 5;
+      li.querySelector(".prayer-name span").textContent = friday ? "ג'ומעה" : p.he;
+      li.querySelector('[lang="ar"]').textContent = friday ? "الجمعة" : p.ar;
+      li.querySelector(".prayer-time").textContent = todayPrayers[p.id];
+      if (isFaruq && FARUQ_IQAMA[p.id]) {
+        var iq = document.createElement("span");
+        iq.className = "iqama";
+        iq.textContent = "אקאמה · الإقامة " + hhmm(minutesOf(todayPrayers[p.id]) + FARUQ_IQAMA[p.id]);
+        li.appendChild(iq);
+      }
+      prayerList.appendChild(li);
+    });
+
+    if (next) {
+      var diff = minutesOf(todayPrayers[next.id]) - nowMin;
+      prayerNext.textContent = "הבאה: " + next.he + " בעוד " +
+        (diff >= 60 ? Math.floor(diff / 60) + ":" + String(diff % 60).padStart(2, "0") + " שע׳" : diff + " דק׳");
+    } else {
+      var tomorrow = new Date(now); tomorrow.setDate(now.getDate() + 1);
+      prayerNext.textContent = "מחר: פג'ר ב-" + prayerTimes(tomorrow, prayerCfg.lat, prayerCfg.lng, prayerCfg.method, prayerCfg.asr).fajr;
+    }
+
+    var fajr = todayPrayers.fajr, sunrise = todayPrayers.sunrise, isha = todayPrayers.isha;
+    var note = minutesOf(fajr) < 300
+      ? "הפג'ר היום ב-" + fajr + ", לפני הקימה ב-05:00 — זמנו נמשך עד הזריחה ב-" + sunrise + ", כך שיש חלון לתפילה אחרי הקימה."
+      : "הפג'ר היום ב-" + fajr + ", אחרי הקימה ב-05:00.";
+    if (minutesOf(isha) >= 20 * 60 + 45) note += " העישא ב-" + isha + " — קרוב לשעת השינה (21:30), כדאי להיות מוכנים לשינה כבר לפני.";
+    prayerNote.textContent = geoMsg || note;
+  }
+
+  // ---------- מדד השלמה ----------
+  var history = load("md-history", {});
+  var MONTHS = ["ינואר", "פברואר", "מרץ", "אפריל", "מאי", "יוני", "יולי", "אוגוסט", "ספטמבר", "אוקטובר", "נובמבר", "דצמבר"];
+  var DOW = ["א׳", "ב׳", "ג׳", "ד׳", "ה׳", "ו׳", "ש׳"];
+  var viewMonth = new Date(); viewMonth.setDate(1);
+  var CIRC = 2 * Math.PI * 54;
+  var ringFill = document.getElementById("ring-fill");
+  ringFill.style.strokeDasharray = CIRC;
+
+  function level(p) {
+    if (p == null) return "";
+    if (p >= 80) return "l4";
+    if (p >= 50) return "l3";
+    if (p >= 25) return "l2";
+    return "l1";
+  }
+
+  function updateScore() {
+    var hDone = habitsDone();
+    var tDone = tasks.items.filter(function (t) { return t.done; }).length;
+    var all = totalHabits + tasks.items.length;
+    var pct = all ? Math.round((hDone + tDone) / all * 100) : 0;
+    history[todayKey()] = pct;
+    save("md-history", history);
+
+    document.getElementById("day-pct").textContent = pct + "%";
+    document.getElementById("ring").setAttribute("aria-label", "השלמה היום: " + pct + "%");
+    ringFill.style.strokeDashoffset = CIRC * (1 - pct / 100);
+    document.getElementById("breakdown").textContent =
+      "היום: הרגלים " + hDone + "/" + totalHabits + " · משימות " + tDone + "/" + tasks.items.length +
+      " · סבבי ריכוז " + rounds.count;
+
+    // רצף: ימים רצופים מעל 50% (היום נספר רק אם כבר עבר את הסף)
+    var streak = 0, d = new Date();
+    if ((history[dateKey(d)] || 0) < 50) d.setDate(d.getDate() - 1);
+    while ((history[dateKey(d)] || 0) >= 50) { streak++; d.setDate(d.getDate() - 1); }
+    document.getElementById("streak").textContent = streak;
+
+    renderMonth();
+  }
+
+  function renderMonth() {
+    var y = viewMonth.getFullYear(), m = viewMonth.getMonth();
+    var now = new Date(), tKey = todayKey();
+    document.getElementById("month-title").textContent = MONTHS[m] + " " + y;
+    document.getElementById("next-month").disabled =
+      y > now.getFullYear() || (y === now.getFullYear() && m >= now.getMonth());
+
+    var cal = document.getElementById("cal");
+    cal.innerHTML = "";
+    DOW.forEach(function (n) {
+      var c = document.createElement("div");
+      c.className = "dow";
+      c.textContent = n;
+      cal.appendChild(c);
+    });
+    var first = new Date(y, m, 1).getDay();
+    for (var i = 0; i < first; i++) cal.appendChild(document.createElement("div"));
+
+    var days = new Date(y, m + 1, 0).getDate();
+    var sum = 0, count = 0, good = 0;
+    for (var day = 1; day <= days; day++) {
+      var date = new Date(y, m, day), key = dateKey(date);
+      var p = history[key];
+      var c = document.createElement("div");
+      c.className = "day " + level(p);
+      if (key === tKey) c.classList.add("today");
+      if (date > now && key !== tKey) c.classList.add("future");
+      c.textContent = day;
+      c.title = day + "." + (m + 1) + (p != null ? " · " + p + "%" : " · אין נתונים");
+      cal.appendChild(c);
+      if (p != null) { sum += p; count++; if (p >= 80) good++; }
+    }
+    document.getElementById("month-avg").textContent = count ? Math.round(sum / count) + "%" : "—";
+    document.getElementById("month-avg-label").textContent =
+      "ממוצע " + MONTHS[m] + (count ? " (" + count + " ימים)" : "");
+    document.getElementById("month-good").textContent = good;
+  }
+
+  document.getElementById("prev-month").addEventListener("click", function () {
+    viewMonth.setMonth(viewMonth.getMonth() - 1);
+    renderMonth();
+  });
+  document.getElementById("next-month").addEventListener("click", function () {
+    viewMonth.setMonth(viewMonth.getMonth() + 1);
+    renderMonth();
+  });
+
+  // ---------- יום חדש ----------
+  function checkNewDay() {
+    var key = todayKey();
+    var changed = false;
+    if (habitState.date !== key) {
+      habitState = { date: key, checked: {} };
+      save("md-habits", habitState);
+      renderHabits();
+      changed = true;
+    }
+    if (tasks.date !== key) {
+      tasks = { date: key, items: tasks.items.filter(function (t) { return !t.done; }) };
+      saveTasks();
+      renderTasks();
+      changed = true;
+    }
+    if (rounds.date !== key) {
+      rounds = { date: key, count: 0 };
+      save("md-rounds", rounds);
+      renderRounds();
+    }
+    if (fired.date !== key) {
+      fired = { date: key, ids: {} };
+      save("md-fired", fired);
+    }
+    if (changed) {
+      viewMonth = new Date(); viewMonth.setDate(1);
+      updateScore();
+    }
+  }
+
+  // ---------- התחלה ----------
+  if (habitState.date !== todayKey()) habitState = { date: todayKey(), checked: {} };
+  if (tasks.date !== todayKey()) {
+    tasks = { date: todayKey(), items: tasks.items.filter(function (t) { return !t.done; }) };
+    saveTasks();
+  }
+  renderTimer();
+  renderRounds();
+  renderTasks();
+  renderHabits();
+  renderReminders();
+  renderNotifyState();
+  updateScore();
+  buildPrayerSettings();
+  renderPrayers();
+  checkReminders();
+
+  document.addEventListener("visibilitychange", function () {
+    if (!document.hidden) { checkNewDay(); renderPrayers(); checkReminders(); if (timer.endAt) tick(); }
+  });
+  setInterval(function () { checkNewDay(); renderPrayers(); checkReminders(); }, 20 * 1000);
+})();
+</script>
+</body>
+</html>
